@@ -46,7 +46,7 @@ const createPost = async (req, res) => {
     const newPost = await Post.create({ title, content, creator })
     return res.status(201).json(newPost)
   } catch (error) {
-    return res.json(error)
+    return res.status(500).json({ error: error.message })
   }
 }
 
@@ -66,7 +66,7 @@ const deletePost = async (req, res) => {
 
     return res.status(200).json({ msg: "Post DELETED", deletedPost })
   } catch (error) {
-    return res.json(error.message)
+    return res.status(500).json(error.message)
   }
 }
 
