@@ -6,6 +6,7 @@ const app = express()
 app.use(express.json())
 
 app.use("/posts", require("./routes/postsRoutes"))
+app.use("/auth", require("./routes/authRoutes"))
 
 const main = async () => {
   try {
