@@ -36,14 +36,14 @@ const getPost = async (req, res) => {
 // CREATE POST
 //---------------------------------------------------------------------------------
 const createPost = async (req, res) => {
-  const { title, content, imageUrl, creator } = req.body
+  const { title, content, creator } = req.body
 
-  if (!title || !content || !imageUrl || !creator) {
+  if (!title || !content || !creator) {
     return res.status(422).json({ error: "All fields are required" })
   }
 
   try {
-    const newPost = await Post.create({ title, content, imageUrl, creator })
+    const newPost = await Post.create({ title, content, creator })
     return res.status(201).json(newPost)
   } catch (error) {
     return res.json(error)
@@ -52,8 +52,22 @@ const createPost = async (req, res) => {
 
 // DELETE POST
 //---------------------------------------------------------------------------------
-const deletePost = (req, res) => {
-  res.status(200).json({ msg: `DELETE A POST POST id:${req.params.postId}` })
+const deletePost = async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.postId)) {
+    return res.status(404).json({ error: "Invalid id" })
+  }
+
+  try {
+    const deletedPost = await Post.findByIdAndDelete(req.params.postId)
+
+    if (!deletedPost) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    return res.status(200).json({ msg: "Post DELETED", deletedPost })
+  } catch (error) {
+    return res.json(error.message)
+  }
 }
 
 // EDIT POST
