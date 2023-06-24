@@ -4,10 +4,19 @@ const Post = require("../models/Post")
 // GET ALL POSTS
 //---------------------------------------------------------------------------------
 const getAllPosts = async (req, res) => {
-  try {
-    const posts = await Post.find({})
+  // Pagination. url query for pagination --> ?page=<numberPageHere>
+  const currentPage = req.query.page || 1
+  const itemsPerPage = 5
+  let totalItems
 
-    return res.status(200).json(posts)
+  try {
+    totalItems = await Post.find({}).countDocuments()
+
+    const posts = await Post.find()
+      .skip((currentPage - 1) * itemsPerPage)
+      .limit(itemsPerPage)
+
+    return res.status(200).json({ totalItems, itemsPerPage, posts })
   } catch (error) {
     return res.status(500).json({ error: error.message })
   }
