@@ -69,13 +69,18 @@ const deletePost = async (req, res) => {
   }
 
   try {
-    const deletedPost = await Post.findByIdAndDelete(req.params.postId)
-
-    if (!deletedPost) {
+    const post = await Post.findById(req.params.postId)
+    if (!post) {
       return res.status(404).json({ error: "Post not found" })
     }
 
-    return res.status(200).json({ msg: "Post DELETED", deletedPost })
+    // Check if post belogns to user. toString() to compare mongoDB Objects
+    if (req.user.toString() !== post.creator.toString()) {
+      return res.status(401).json({ error: "This post IS NOT yours to delete" })
+    } else {
+      const deletedPost = await Post.findByIdAndDelete(post._id)
+      return res.status(200).json({ msg: "Post DELETED", deletedPost })
+    }
   } catch (error) {
     return res.status(500).json(error.message)
   }
@@ -84,9 +89,9 @@ const deletePost = async (req, res) => {
 // EDIT POST
 //---------------------------------------------------------------------------------
 const editPost = async (req, res) => {
-  const { title, content, creator } = req.body
+  const { title, content } = req.body
 
-  if (!title || !content || !creator) {
+  if (!title || !content) {
     return res.status(422).json({ error: "All fields are required" })
   }
 
@@ -101,9 +106,13 @@ const editPost = async (req, res) => {
       return res.status(404).json({ error: "Not found. Wrong id or deleted post" })
     }
 
+    // Check if post belogns to user. toString() to compare mongoDB Objects
+    if (req.user.toString() !== post.creator.toString()) {
+      return res.status(401).json({ error: "This post IS NOT yours to edit" })
+    }
+
     post.title = title
     post.content = content
-    post.creator = creator
     const updatedPost = await post.save()
 
     res.status(200).json(updatedPost)
