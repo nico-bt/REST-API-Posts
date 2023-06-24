@@ -1,13 +1,40 @@
+const mongoose = require("mongoose")
 const Post = require("../models/Post")
 
-const getAllPosts = (req, res) => {
-  res.status(200).json({ msg: "GET ALL POSTS" })
+// GET ALL POSTS
+//---------------------------------------------------------------------------------
+const getAllPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({})
+
+    return res.status(200).json(posts)
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
 }
 
-const getPost = (req, res) => {
-  res.status(200).json({ msg: `GET INDIVIDUAL POST id:${req.params.postId}` })
+// GET SINGLE POST
+//---------------------------------------------------------------------------------
+const getPost = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.postId)) {
+      return res.status(404).json({ error: "Invalid id" })
+    }
+
+    const post = await Post.findById(req.params.postId)
+
+    if (!post) {
+      return res.status(404).json({ error: "Not found. Wrong id or deleted post" })
+    }
+
+    return res.status(200).json(post)
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
 }
 
+// CREATE POST
+//---------------------------------------------------------------------------------
 const createPost = async (req, res) => {
   const { title, content, imageUrl, creator } = req.body
 
@@ -23,10 +50,14 @@ const createPost = async (req, res) => {
   }
 }
 
+// DELETE POST
+//---------------------------------------------------------------------------------
 const deletePost = (req, res) => {
   res.status(200).json({ msg: `DELETE A POST POST id:${req.params.postId}` })
 }
 
+// EDIT POST
+//---------------------------------------------------------------------------------
 const editPost = (req, res) => {
   res.status(200).json({ msg: `EDIT A POST POST id:${req.params.postId}` })
 }
