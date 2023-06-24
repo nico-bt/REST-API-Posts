@@ -34,4 +34,34 @@ const createUser = async (req, res) => {
   }
 }
 
-module.exports = { createUser }
+// LOG IN User
+//----------------------------------------------------------------------------
+const loginUser = async (req, res) => {
+  const { email, password } = req.body
+
+  if (!email || !password) {
+    return res.status(400).json({ error: "Please enter all fields" })
+  }
+
+  try {
+    const user = await User.findOne({ email })
+    if (!user) {
+      return res.status(400).json({ error: `${email} is not registered. Sign up first please.` })
+    }
+    // Check if passsword match with hashed password in DB
+    const match = await bcrypt.compare(password, user.password)
+
+    if (!match) {
+      return res.status(400).json({ error: "Wrong credentials" })
+    }
+
+    if (match) {
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" })
+      res.json({ email: user.email, token })
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+
+module.exports = { createUser, loginUser }
