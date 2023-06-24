@@ -4,6 +4,9 @@ const express = require("express")
 const isAuth = require("./middleware/isAuth")
 const app = express()
 
+const cors = require("cors")
+app.use(cors())
+
 app.use(express.json())
 
 app.use("/posts", isAuth, require("./routes/postsRoutes"))
