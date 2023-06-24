@@ -72,8 +72,33 @@ const deletePost = async (req, res) => {
 
 // EDIT POST
 //---------------------------------------------------------------------------------
-const editPost = (req, res) => {
-  res.status(200).json({ msg: `EDIT A POST POST id:${req.params.postId}` })
+const editPost = async (req, res) => {
+  const { title, content, creator } = req.body
+
+  if (!title || !content || !creator) {
+    return res.status(422).json({ error: "All fields are required" })
+  }
+
+  if (!mongoose.isValidObjectId(req.params.postId)) {
+    return res.status(404).json({ error: "Invalid id" })
+  }
+
+  try {
+    const post = await Post.findById(req.params.postId)
+
+    if (!post) {
+      return res.status(404).json({ error: "Not found. Wrong id or deleted post" })
+    }
+
+    post.title = title
+    post.content = content
+    post.creator = creator
+    const updatedPost = await post.save()
+
+    res.status(200).json(updatedPost)
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
 }
 
 module.exports = { getAllPosts, getPost, createPost, deletePost, editPost }
