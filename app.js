@@ -1,11 +1,12 @@
 require("dotenv").config()
 const mongoose = require("mongoose")
 const express = require("express")
+const isAuth = require("./middleware/isAuth")
 const app = express()
 
 app.use(express.json())
 
-app.use("/posts", require("./routes/postsRoutes"))
+app.use("/posts", isAuth, require("./routes/postsRoutes"))
 app.use("/auth", require("./routes/authRoutes"))
 
 const main = async () => {
