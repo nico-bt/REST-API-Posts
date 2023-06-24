@@ -1,6 +1,8 @@
 const mongoose = require("mongoose")
 const Post = require("../models/Post")
 
+//Obs: req.user has the user._id added by the isAuth middleware
+
 // GET ALL POSTS
 //---------------------------------------------------------------------------------
 const getAllPosts = async (req, res) => {
@@ -45,14 +47,14 @@ const getPost = async (req, res) => {
 // CREATE POST
 //---------------------------------------------------------------------------------
 const createPost = async (req, res) => {
-  const { title, content, creator } = req.body
+  const { title, content } = req.body
 
-  if (!title || !content || !creator) {
+  if (!title || !content) {
     return res.status(422).json({ error: "All fields are required" })
   }
 
   try {
-    const newPost = await Post.create({ title, content, creator })
+    const newPost = await Post.create({ title, content, creator: req.user })
     return res.status(201).json(newPost)
   } catch (error) {
     return res.status(500).json({ error: error.message })
